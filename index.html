@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ASSE Kop Nord Tracker</title><style>
+body{font-family:Arial,sans-serif;max-width:1000px;margin:auto;padding:20px;background:#0f172a;color:white}
+.card{background:#1e293b;padding:15px;border-radius:12px;margin:10px 0}
+input,select,button{padding:8px;margin:4px}button{background:#16a34a;color:white;border:none;border-radius:6px}
+table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid #475569}
+</style></head><body>
+<h1>⚽ ASSE - Rentabilité Abonnement Kop Nord</h1>
+<div class='card'>
+<label>Coût de l'abonnement (€)</label><br>
+<input id='abo' type='number'><button onclick='saveAbo()'>Enregistrer</button>
+</div>
+<div class='card'>
+<h3>Match vu au stade</h3>
+<input id='matchvu' placeholder='ASSE - OM'>
+<input id='resultat' placeholder='2-1'>
+<button onclick='addVu()'>Ajouter</button>
+</div>
+<div class='card'>
+<h3>Match revendu</h3>
+<input id='matchvendu' placeholder='ASSE - PSG'>
+<input id='prix' type='number' placeholder='Prix vente'>
+<button onclick='addVente()'>Ajouter</button>
+</div>
+<div class='card'><h3>Statistiques</h3><div id='stats'></div></div>
+<div class='card'><h3>Matchs vus</h3><div id='vus'></div></div>
+<div class='card'><h3>Matchs vendus</h3><div id='ventes'></div></div>
+<script>
+let db=JSON.parse(localStorage.asseTracker||'{"abo":0,"vus":[],"ventes":[]}');
+abo.value=db.abo||'';
+function save(){localStorage.asseTracker=JSON.stringify(db);render();}
+function saveAbo(){db.abo=+abo.value||0;save();}
+function addVu(){db.vus.push({m:matchvu.value,r:resultat.value});save();}
+function addVente(){db.ventes.push({m:matchvendu.value,p:+prix.value||0});save();}
+function render(){
+let totalVentes=db.ventes.reduce((a,b)=>a+b.p,0);
+let coutNet=db.abo-totalVentes;
+let matchsVus=db.vus.length;
+let coutParMatch=matchsVus?coutNet/matchsVus:coutNet;
+stats.innerHTML=`Coût abonnement : ${db.abo.toFixed(2)} €<br>Recettes revente : ${totalVentes.toFixed(2)} €<br><b>Coût net abonnement : ${coutNet.toFixed(2)} €</b><br>Matchs vus : ${matchsVus}<br><b>Coût par match vu : ${coutParMatch.toFixed(2)} €</b>`;
+vus.innerHTML='<table><tr><th>Match</th><th>Résultat</th></tr>'+db.vus.map(x=>`<tr><td>${x.m}</td><td>${x.r}</td></tr>`).join('')+'</table>';
+ventes.innerHTML='<table><tr><th>Match</th><th>Prix</th></tr>'+db.ventes.map(x=>`<tr><td>${x.m}</td><td>${x.p.toFixed(2)} €</td></tr>`).join('')+'</table>';
+}
+render();
+</script></body></html>
